@@ -1,0 +1,16 @@
+0	1	orf_id
+1	2	orf_length
+2	6	fickett
+6	7	hexamer
+7	8	codon_bias
+8	14	nt_bias
+14	18	1_mer
+18	34	2_mer
+34	98	3_mer
+98	354	4_mer
+354	370	1_gap
+370	386	2_gap
+386	402	3_gap
+402	658	1_bigap
+658	914	2_bigap
+914	1170	3_bigap
