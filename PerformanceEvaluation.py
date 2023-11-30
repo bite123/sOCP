@@ -6,6 +6,9 @@ This script provides functions evaluating model performance.
 """
 
 import argparse
+import Util
+
+METRIC_ID = ["TPR", "TNR", "FPR", "FNR", "PRE", "ACC", "F1S", "HM", "MCC"]
 
 # This function is used in case dividing by zero.
 def div(a, b):
@@ -26,9 +29,8 @@ def combine_pred_act(output_file, prediction_file, actual_file):
 	actual_dict = Util.tsv_to_dict(actual_file)
 	with open(output_file, "w") as f_out:
 		for key,value in prediction_dict.items():
-			if key in actual_dict:
-				act_value = actual_dict[key]
-			new_line = "\t".join([key, value, act_value])
+			act_value = actual_dict[key]
+			new_line = "\t".join([key, value, act_value]) + "\n"
 			f_out.write(new_line)
 
 ################################################################################
@@ -116,6 +118,8 @@ def cutoff_metric(input_file, output_file):
 	total_score = list(set(total_score))
 	# output
 	with open(output_file, "w") as f_out:
+		head_line = "Cutoff\t" + "\t".join(METRIC_ID) + "\n"
+		f_out.write(head_line)
 		for score in total_score:
 			metric_list = eval_metric(input_file, cutoff = score)
 			metric_list = [str(i) for i in metric_list]
@@ -146,11 +150,13 @@ def roc_curve(input_file, output_file):
 			new_fpr = div(fp, n)
 			adding_area = round((new_fpr - fpr) * tpr, 8)
 			fpr = new_fpr
-		plot_list.append([fpr, tpr])
+		plot_list.append([score, fpr, tpr])
 		auc += adding_area
 	with open(output_file, "w") as f_out:
+		head_line = "Cutoff\tFPR\tTPR\n"
+		f_out.write(head_line)
 		for plot in plot_list:
-			line = str(plot[0]) + "\t" + str(plot[1]) + "\n"
+			line = str(plot[0]) + "\t" + str(plot[1]) + "\t" + str(plot[2]) + "\n"
 			f_out.write(line)
 	return auc
 
@@ -172,11 +178,13 @@ def pr_curve(input_file, output_file):
 		new_pre = div(tp, (tp + fp))
 		adding_area = round((new_tpr - tpr) * (new_pre + pre)/2, 8)
 		tpr, pre = new_tpr, new_pre
-		plot_list.append([tpr, pre])
+		plot_list.append([score, tpr, pre])
 		auc += adding_area
 	with open(output_file, "w") as f_out:
+		head_line = "Cutoff\tRecall (TPR)\tPresicion (PRE)\n"
+		f_out.write(head_line)
 		for plot in plot_list:
-			line = str(plot[0]) + "\t" + str(plot[1]) + "\n"
+			line = str(plot[0]) + "\t" + str(plot[1]) + "\t" + str(plot[2]) + "\n"
 			f_out.write(line)
 	return auc
 
@@ -195,7 +203,7 @@ if __name__ == '__main__':
 	ARGS = parser.parse_args()
 
 	prediction_file = ARGS.input
-	act_file = ARGS.actual
+	actual_file = ARGS.actual
 	output_prefix = ARGS.output
 	output_preproc = output_prefix + ".preprocessed.tsv"
 	output_metric = output_prefix + ".metric.tsv"
@@ -204,11 +212,11 @@ if __name__ == '__main__':
 
 	combine_pred_act(output_preproc, prediction_file, actual_file)
 
-	metric_id = [TPR, TNR, FPR, FNR, PRE, ACC, F1S, HM, MCC]
+	METRIC_ID = ["TPR", "TNR", "FPR", "FNR", "PRE", "ACC", "F1S", "HM", "MCC"]
 	metric_list = cutoff_metric(output_preproc, output_metric)
 	print("Metrics (cutoff = 0.5):")
-	for i in range(len(metric_id)):
-		print(metric_id[i] + "\t" + str(metric_list[i]))
+	for i in range(len(METRIC_ID)):
+		print(METRIC_ID[i] + "\t" + str(metric_list[i]))
 
 	auc_roc = roc_curve(output_preproc, output_roc)
 	print("AUC ROC:")

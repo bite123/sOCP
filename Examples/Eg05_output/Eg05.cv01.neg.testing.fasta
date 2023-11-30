@@ -1,0 +1,12 @@
+>ENST00000612925.1 ncrna scaffold:GRCh38:KI270750.1:148668:148843:1 gene:ENSG00000277374.1 gene_biotype:snRNA transcript_biotype:snRNA gene_symbol:U1 description:U1 spliceosomal RNA [Source:RFAM;Acc:RF00003]
+CAAATGTGGGAAGCTCTACTGCAAAATTTTTGGTAG
+>ENST00000516617.1 ncrna chromosome:GRCh38:Y:25723342:25723495:1 gene:ENSG00000252426.1 gene_biotype:snRNA transcript_biotype:snRNA gene_symbol:RNU1-107P description:RNA, U1 small nuclear 107, pseudogene [Source:HGNC Symbol;Acc:HGNC:48449]
+ACTATGGATGTGCCGACCCCTGAGATTTACAAAATTGTGGGAAACTCAACTGCATAA
+>ENST00000645734.1 ncrna chromosome:GRCh38:CHR_HG76_PATCH:9475410:9475516:-1 gene:ENSG00000284813.1 gene_biotype:snRNA transcript_biotype:snRNA gene_symbol:RNU6-729P description:RNA, U6 small nuclear 729, pseudogene [Source:HGNC Symbol;Acc:HGNC:47692]
+AGCATGGCTCCTGCGCAAGGATGGCACGCACATTCGTGA
+>ENST00000384425.1 ncrna chromosome:GRCh38:18:51283733:51283896:-1 gene:ENSG00000207154.1 gene_biotype:snRNA transcript_biotype:snRNA gene_symbol:RNU1-46P description:RNA, U1 small nuclear 46, pseudogene [Source:HGNC Symbol;Acc:HGNC:48388]
+CAAATGCGGGAAACTCAGCTGCATAATTTGTGGTAG
+>ENST00000646237.1 ncrna chromosome:GRCh38:CHR_HSCHR3_8_CTG2_1:175403968:175404069:-1 gene:ENSG00000285461.1 gene_biotype:snRNA transcript_biotype:snRNA gene_symbol:RNU6-1233P description:RNA, U6 small nuclear 1233, pseudogene [Source:HGNC Symbol;Acc:HGNC:48196]
+CACATGTACTATAATTGGAATGATACAGAGAAGATTAGCATGGCCTCTGTGAAAGGATGA
+>ENST00000363361.1 ncrna chromosome:GRCh38:20:24237255:24237398:1 gene:ENSG00000200231.1 gene_biotype:snRNA transcript_biotype:snRNA gene_symbol:RNU1-23P description:RNA, U1 small nuclear 23, pseudogene [Source:HGNC Symbol;Acc:HGNC:41964]
+CTCATGATTTCCCCAAGTGTAGGACACTCAACTGCATAA

@@ -9,18 +9,10 @@ import argparse
 from sklearn import *
 import pandas as pd
 import pymrmr
-import FeatureExtraction
+import Util
 import ScikitModel
 from FeatureDataProc import data_dict_read
-
-def load_feature_cord():
-	FEATURE_CORD = {}
-	with open("Data/FeatureID.list") as f_in:
-		for line in f_in:
-			elements = line.strip().split("\t")
-			FEATURE_CORD[elements[2]] = elements[0:2]
-	return FEATURE_CORD
-
+from FeatureExtraction import feature_extraction_batch
 
 
 if __name__ == '__main__':
@@ -32,13 +24,19 @@ if __name__ == '__main__':
 	parser.add_argument("-d", "--dict",
 						help="Directory containing codonbias, hexamer and ntbias files", required=True)
 	parser.add_argument("-f", "--feature_list",
-						help="File recording feature subsets in feature ablation", required=True)
+						help="File recording features in feature ablation", required=True)
 	parser.add_argument("-m", "--model",
-						help="Model code for sklearn", required=True)
+						help="File recording the model", required=True)
 	ARGS = parser.parse_args()
 
 
 	# Parsing input files
+	cv_file_list = []
+	with open(ARGS.cv_file_list) as f_in:
+		for line in f_in:
+			elements = line.strip().split("\t")
+			cv_file_list.append(elements)
+
 	codon_in = ARGS.dict + "/codonbias.tsv"
 	codon_dict = data_dict_read(codon_in)
 	hexa_in = ARGS.dict + "/hexamer.tsv"
@@ -46,58 +44,50 @@ if __name__ == '__main__':
 	ntbias_in = ARGS.dict + "/ntbias.tsv"
 	ntbias_dict = data_dict_read(ntbias_in)
 
-	model = ARGS.model
-	FEATURE_CORD = load_feature_cord()
+	with open(ARGS.model) as f_in:
+		line = f_in.readline()
+		model = line.strip("\n")
 
-	cv_file_list = []
-	with open(ARGS.cv_file_list) as f_in:
-		for line in f_in:
-			elements = line.strip().split("\t")
-			cv_file_list.append(elements)
-
-	ablation_list = []
-	with open(ARGS.feature_list) as f_in:
-		for line in f_in:
-			ablation_list.append(line.strip())
+	ablation_dict = Util.load_feature_list_to_dictionary(ARGS.feature_list)
+	ablation_dict["None"] = [] # The initial feature list 
 
 
-	# Ablation
-	for i in range(len(ablation_list)):
+	# cross validation
+	acc_dict = {}
+	mcc_dict = {}
+	for k,v in ablation_dict.items():
 		# parsing feature list
-		key = "ablation" + str(i)
+		new_key = "ablation:" + k
 		feature_list = []
-		for j in range(len(ablation_list)):
-			if j != i:
-				feature_location = FEATURE_CORD[ablation_list[j]]
-				for k in range(feature_location[0], feature_location[1]):
-					feature_list.append(k)
+		for j,w in ablation_dict.items():
+			if j != k:
+				feature_list.extend(w)
 
-		# cross validation
-		acc_dict[key] = []
-		mcc_dict[key] = []
+		# training model
+		acc_dict[new_key] = []
+		mcc_dict[new_key] = []
 		for input_list in cv_file_list:
-			FeatureExtraction.feature_extraction_batch(input_list[0], "tmp_pos_train_file", codon_dict, hexa_dict, ntbias_dict, feature_list)
-			FeatureExtraction.feature_extraction_batch(input_list[1], "tmp_pos_test_file", codon_dict, hexa_dict, ntbias_dict, feature_list)
-			FeatureExtraction.feature_extraction_batch(input_list[2], "tmp_neg_train_file", codon_dict, hexa_dict, ntbias_dict, feature_list)
-			FeatureExtraction.feature_extraction_batch(input_list[3], "tmp_neg_test_file", codon_dict, hexa_dict, ntbias_dict, feature_list)
+			feature_extraction_batch(input_list[0], "tmp_pos_train_file", codon_dict, hexa_dict, ntbias_dict, feature_list)
+			feature_extraction_batch(input_list[1], "tmp_pos_test_file", codon_dict, hexa_dict, ntbias_dict, feature_list)
+			feature_extraction_batch(input_list[2], "tmp_neg_train_file", codon_dict, hexa_dict, ntbias_dict, feature_list)
+			feature_extraction_batch(input_list[3], "tmp_neg_test_file", codon_dict, hexa_dict, ntbias_dict, feature_list)
 
 			X_train, Y_train = ScikitModel.load_feature("tmp_pos_train_file", "tmp_neg_train_file")
 			X_test, Y_test = ScikitModel.load_feature("tmp_pos_test_file", "tmp_neg_test_file")
 			clf = eval(model)
 			acc, mcc = ScikitModel.model_train(X_train, Y_train, X_test, Y_test, clf)
-			acc_dict[key].append(str(acc))
-			mcc_dict[key].append(str(mcc))
+			acc_dict[new_key].append(str(acc))
+			mcc_dict[new_key].append(str(mcc))
+
 
 	# generating output files
-	with open(output_file+".ablation_acc.tsv", "w") as f_out:
+	with open(ARGS.output+".ablation_acc.tsv", "w") as f_out:
 		for key in sorted(acc_dict.keys()):
-			new_line = key + "\t" + "\t".join(value) + "\n"
+			new_line = key + "\t" + "\t".join(acc_dict[key]) + "\n"
 			f_out.write(new_line)
-
-
-	with open(output_file+".ablation_mcc.tsv", "w") as f_out:
+	with open(ARGS.output+".ablation_mcc.tsv", "w") as f_out:
 		for key in sorted(mcc_dict.keys()):
-			new_line = key + "\t" + "\t".join(value) + "\n"
+			new_line = key + "\t" + "\t".join(mcc_dict[key]) + "\n"
 			f_out.write(new_line)
 
 

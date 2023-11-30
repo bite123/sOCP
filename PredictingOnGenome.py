@@ -65,9 +65,9 @@ if __name__ == '__main__':
 	seq_dict = Util.fasta_to_dict(ARGS.input, parse=True, sep="")
 	start_codon_cutoff = load_cutoff(ARGS.cutoff)
 
-	output_fasta_file = ARGS.output + ".fasta"
-	output_upsite_file = ARGS.output + ".upsite.list"
-	output_bed_file = ARGS.output + ".bed"
+	output_fasta_file = ARGS.output + ".socp.fasta"
+	output_upsite_file = ARGS.output + ".socp.upsite.tsv"
+	output_bed_file = ARGS.output + ".socp.bed"
 
 	################################################################################
 	# Processing length setting
@@ -91,7 +91,7 @@ if __name__ == '__main__':
 	ntbias_in = ARGS.model + "/ntbias.tsv"
 	ntbias_dict = data_dict_read(ntbias_in)
 
-	f_list_in = ARGS.model + "/feature_id.list"
+	f_list_in = ARGS.model + "/feature.list"
 	feature_list = Util.load_feature_list(f_list_in)
 
 	model_in = ARGS.model + "/pretrained.model"
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 	################################################################################
 	with open(output_fasta_file, "w") as fa_out, open(output_upsite_file, "w") as ef_out, open(output_bed_file, "w") as bed_out:
 		for key,value in seq_dict.items():
-			seq_id = key
+			seq_id = key.lstrip(">").strip().split(" ")[0]
 			seq = value.upper()
 			# processing the sense strand
 			for i in range(len(seq)):
@@ -131,7 +131,7 @@ if __name__ == '__main__':
 								bed = [seq_id, str(start_position), str(end_position), orf_id, "+", score]
 								fa_out.write(">" + orf_id + "\n" + orf + "\n")
 								ef_out.write(orf_id + "\t" + extended_orf[0:3] + "\n")						
-								bed_out.write("\t".join(bed_l) + "\n")
+								bed_out.write("\t".join(bed) + "\n")
 							break
 			# processing the anti-sense strand
 			rc_seq = reverse_complement(seq)

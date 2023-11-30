@@ -1,0 +1,3 @@
+svm.SVC(kernel="rbf")
+ensemble.RandomForestClassifier(max_features="sqrt")
+ensemble.GradientBoostingClassifier(learning_rate=0.8)

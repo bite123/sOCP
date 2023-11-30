@@ -341,7 +341,7 @@ def feature_extraction_batch(input_file, output_file, codon_dict, hexa_dict, ntb
 	seq_dict = Util.fasta_to_dict(input_file, parse=True, sep="")
 	with open(output_file, "w") as f_out:
 		for k,v in seq_dict.items():
-			orf_id = k
+			orf_id = k.strip()
 			orf_feature = feature_extraction(v, codon_dict, hexa_dict, ntbias_dict, feature_list)
 			new_line = orf_id + "\t" + "\t".join([str(i) for i in orf_feature]) + "\n"
 			f_out.write(new_line)
