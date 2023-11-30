@@ -436,6 +436,8 @@ Of course, **PredictingCodingPotential.py** could help you to acquire evaluation
 
 # Predicting smORFs from genome
 
+In **Section 10** and **Section** **11**, we will show how to use a trained model to predict smORFs from genome.
+
 ## 10 Set cutoff for prediction
 
 Before prediction, a cutoff list is required. See **Data/CutoffConf.list**:
@@ -458,6 +460,8 @@ The first column indicates the start codon of smORFs, and the second column indi
 Non-ATG start codons vary largely in efficiency and frequency. You could adjust their cutoff to your interest.  Or set all cutoffs of non-ATG start codons as 0, if you only concern about ATG-started smORFs.
 
 ## 11 Predicting smORFs from the genome (Eg12)
+
+As an example, we will use the model trained in **Eg10**. And a ~700k sequence from human genome will be used as the input genome, split into ChrA and ChrB.
 
 The command lines are as below:
 
