@@ -480,7 +480,7 @@ python PredictingOnGenome.py \
 - **-l** The minimum number of codons (excluding stop codon).  This parameter is optional and set as 10 by default.
 - **-L** The maximum number of codons (excluding stop codon). This parameter is optional and set as 100 by default.
 
-The predicted smORF ID ChrA#1213#+#CTG#760 indicates the smORF starts at Position 1213 on Chromosome ChrA, Strand + (forward), with CTG as its start codon, and is scored 760 by sOCP. 
+The predicted smORF ID ChrA#1213#+#CTG#760 indicates the smORF starts at Position 1213 on Chromosome ChrA, Strand + (forward), with CTG as its start codon, and is scored 0.760 by sOCP. 
 
 The output files includes:
 
