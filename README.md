@@ -425,10 +425,10 @@ python PerformanceEvaluation.py \
 -o Eg11
 ```
 
-The evaluation metrics will be printed at once. There will be also output files:
+The evaluation metrics will be printed to screen at once. There will be these output files for details:
 
 - **Eg11.preprocessed.tsv**, a pre-preprocessed file integrating score and label files together.
-- **Eg11.metric.tsv**, recording TPR, TNR, FPR, FNR, PRE, ACC, F1S, HM, and MCC according to other cutoffs.
+- **Eg11.metric.tsv**. Since the printed metrics are calculated for the default cutoff 0.5, this file records metrics (TPR, TNR, FPR, FNR, PRE, ACC, F1S, HM, and MCC) according to other cutoffs.
 - **Eg11.roc.tsv**, providing data for ROC curve plotting.
 - **Eg11.pr.tsv**, providing data for PR curve plotting.
 
