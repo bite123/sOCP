@@ -153,7 +153,7 @@ In **Section 4** to **Section** **8**, there will be a series of methods showing
 
 ## 4 Preparing dataset (Eg05)
 
-First of all, the positive dataset (extended ORFs from mRNA) and the negative dataset (extended ORFs from mRNA) are required. You can retrieve these FASTA files from NCBI and Ensemble database, and preprocess them to get extended ORFs, as shown in **Section 3**. Remove redundant sequences between the positive dataset and negative dataset using the CD-HIT software is also recommended.
+First of all, the positive dataset (extended ORFs from mRNA) and the negative dataset (extended ORFs from ncRNA) are required. You can retrieve these FASTA files from NCBI and Ensemble database, and preprocess them to get extended ORFs, as shown in **Section 3**. Remove redundant sequences between the positive dataset and negative dataset using the CD-HIT software is also recommended.
 
 In this section, the positive dataset and the negative dataset will be divided for training and testing separately. The training part will be divided further for cross validation.
 
