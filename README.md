@@ -91,7 +91,7 @@ The output file **Eg02.ext_orf.fasta** will be generated. Noted that of 10 input
 ***Note*:** 
 
 - *This function is generally to process mRNA sequences from NCBI RefSeq or other database, in which both mRNA and ORF within the mRNA are provided.*
-- *If you have the mRNA sequence but have no idea where the ORF starts and ends, use the function in **3.1** instead, which only require the RNA sequence as input.*
+- *If you have the mRNA sequence but have no idea where the ORF starts and ends, you can only use the function in **3.1** instead, which require merely the RNA sequence as input. However, it is not recommended.*
 
 ```
 Corresponding description in PreprocessingFasta.py
