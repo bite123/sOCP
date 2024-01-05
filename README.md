@@ -88,6 +88,11 @@ The output file **Eg02.ext_orf.fasta** will be generated. Noted that of 10 input
 
 ### 3.2 Extracting extended ORFs based on mRNA (Eg03)
 
+***Note*:** 
+
+- *This function is generally to process mRNA sequences from NCBI RefSeq or other database, in which both mRNA and ORF within the mRNA are provided.*
+- *If you have the mRNA sequence but have no idea where the ORF starts and ends, use the function in **3.1** instead, which only require the RNA sequence as input.*
+
 ```
 Corresponding description in PreprocessingFasta.py
 # This function extracts the upsteaming 3-nt, based on a CDS file and its corresponding mRNA file.
