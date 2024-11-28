@@ -15,6 +15,7 @@ The sOCP software consists of 3 functions:
   - Extraction of extended ORFs from mRNA will no longer be limited to input FASTA files with 70 words one line.
   - Output sequences will be merged into one line.
   - The regular expression pattern in extraction of extended ORFs from mRNA is changed to accept more forms.
+  - The "filter" mode is added.
 
 # Basic function
 
