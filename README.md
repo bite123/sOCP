@@ -8,6 +8,14 @@ The sOCP software consists of 3 functions:
 2. Providing a pipeline to train a model for predicting coding potential of smORFs.
 3. Providing a method to predict smORFs from the genome using a prepared model。
 
+**Updated history:**
+
+- 2024 Nov, code optimization in PreprocessingFasta.py as below: 
+  - Fix a bug in extraction of extended ORFs from ncRNA.
+  - Extraction of extended ORFs from mRNA will no longer be limited to input FASTA files with 70 words one line.
+  - Output sequences will be merged into one line.
+  - The regular expression pattern in extraction of extended ORFs from mRNA is changed to accept more forms.
+
 # Basic function
 
 ## 1 Getting started
@@ -69,6 +77,7 @@ Corresponding description in PreprocessingFasta.py
 # For extended ORF, if there is an incomplete upstreaming 3-nt, using N instead.
 # If no ORF >= 11 codons is found, return "".
 # Also returning length, start position and end position.
+# Only ORFs with 11 - 101 codons (including the stop codon) will be retained
 ```
 
 The command lines are as below:
@@ -99,8 +108,7 @@ Corresponding description in PreprocessingFasta.py
 # The two fasta files can be retrieved from NCBI RefSeq, and will have the following formats:
 # 1) The CDS and mRNA are in one-to-one correspondence in order.
 # 2) There is location information in the header line, e.g.:
-# >lcl|NM_001419531.1_prot_NP_001406460.1_1 ... [location=256..4701] ...
-# 3) The sequence typeset is 70 nucleotides per line. 
+# >lcl|NM_001419531.1_prot_NP_001406460.1_1 ... [location=256..4701] ... 
 ```
 
 The command lines are as below:
@@ -152,13 +160,41 @@ python PreprocessingFasta.py \
 
 The output file **Eg04.ext_orf.fasta** will be generated. 
 
+## 3.4 Filtering extended ORFs
+
+```
+Corresponding description in PreprocessingFasta.py
+# This function accepts extended ORFs, and removed those:
+# 1) not multiples of 3
+# 2) have non-ACTG nucleotides within
+# 3) have early stop codons 
+# 4) have an out-of-range length (not within 11-101 codons, including the stop codon)
+```
+
+Note that extraction in **3.2** and **3.3** only generate extended ORFs according to the location and will not consider if the ORF sequence is suitable for training.  
+
+If you want to filter extended ORFs according to the above criteria, use the "filter" mode as below:
+
+```
+python PreprocessingFasta.py \
+-t filter \
+-i input.fasta \
+-o output.fasta
+```
+
 # Training a model to predict coding potential of smORFs
 
 In **Section 4** to **Section** **8**, there will be a series of methods showing how to train a model for predicting coding potential of smORFs.
 
 ## 4 Preparing dataset (Eg05)
 
-First of all, the positive dataset (extended ORFs from mRNA) and the negative dataset (extended ORFs from ncRNA) are required. You can retrieve these FASTA files from NCBI and Ensemble database, and preprocess them to get extended ORFs, as shown in **Section 3**. Remove redundant sequences between the positive dataset and negative dataset using the CD-HIT software is also recommended.
+First of all, the positive dataset (extended ORFs from mRNA) and the negative dataset (extended ORFs from ncRNA) are required. You can retrieve these FASTA files from NCBI and Ensemble database, and preprocess them to get extended ORFs, as shown in **Section 3**. 
+
+**Note:**
+
+- You can filter the dataset according to ORF length manually or using the "filter" mode as **3.4** described.
+
+- Remove redundant sequences between the positive dataset and negative dataset, or within each dataset using the CD-HIT software is also recommended.
 
 In this section, the positive dataset and the negative dataset will be divided for training and testing separately. The training part will be divided further for cross validation.
 

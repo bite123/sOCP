@@ -1,6 +1,6 @@
 # _*_ coding: UTF-8 _*_
 # Author: PENG Zhao
-# Version: 2023-10
+# Version: 2024-10
 """ Instruction
 This script provides functions preprocessing the input fasta corresonding file,
 to acquire extended ORFs or the upstreaming 3-nt for sOCP models.
@@ -36,10 +36,12 @@ def extract_orf_from_short_seq(seq):
 					orf_dict[start_position] = [end_position, len_orf]
 					break
 	f_start = ful_len
-	max_len = 33
+	max_len = 32
 	for key,value in orf_dict.items():
-		if value[1] >= max_len:
+		if 303 >= value[1] > max_len:
 			max_len = value[1]
+			f_start = key
+		elif value[1] == max_len:
 			if key < f_start:
 				f_start = key
 	if f_start == ful_len:
@@ -71,63 +73,57 @@ def preproc_ncRNA(input_file, output_file):
 # 1) The CDS and mRNA are in one-to-one correspondence in order.
 # 2) There is location information in the header line, e.g.:
 # >lcl|NM_001419531.1_prot_NP_001406460.1_1 ... [location=256..4701] ...
-# 3) The sequence typeset is 70 nucleotides per line. 
 
 def preproc_CDS_mRNA(input_cds, input_mrna, output_file):
 	# parse CDS to get location
-	pat = re.compile(r'location=(join\()?(\d+)')
+	pat = re.compile(r'location=\D*(\d+)')
 	with open(input_cds) as f_in:
 		pos_dict = {}
+		headline_dict = {}
+		sequence_dict = {}
 		i = 0
 		for line in f_in:
 			if line.startswith(">"):
 				i += 1
-				start_position = int(re.search(pat, line).group(2))
+				headline_dict[i] = line
+				sequence_dict[i] = []
+				start_position = int(re.search(pat, line).group(1))
 				pos_dict[i] = start_position
+			else:
+				sequence_dict[i].append(line)
 
 	# parse mRNA to get the upstreaming 3-nt
 	with open(input_mrna) as f_in:
+		mrna_dict = {}
 		up_dict = {}
 		i = 0
 		for line in f_in:
 			if line.startswith(">"):
 				i += 1
-				start_position = pos_dict[i]
-				if start_position <= 3:
-					line = f_in.readline()
-					up_site = "N" * (3-start_position+1) + line[0:start_position-1]
-				else:
-					jump_line = start_position//70
-					residual_site = start_position%70
-					if residual_site <= 3:
-						jump_line -= 1
-						residual_site += 70
-						for j in range(jump_line):
-							line = f_in.readline()
-						first_line = f_in.readline().strip()
-						second_line = f_in.readline()
-						total_line = first_line + second_line
-						up_site = total_line[residual_site-4:residual_site-1]
-					else:
-						for j in range(jump_line):
-							line = f_in.readline()
-						total_line = f_in.readline()
-						up_site = total_line[residual_site-4:residual_site-1]					
-				up_dict[i] = up_site
+				mrna_dict[i] = []
+			else:
+				mrna_dict[i].append(line.strip())
+		for j in range(len(mrna_dict)):
+			j += 1
+			mrna = "".join(mrna_dict[j])
+			start_position = pos_dict[j]
+			if start_position <= 3:
+				up_site = "N" * (3-start_position+1) + mrna[0:start_position-1]
+			else:
+				up_site = mrna[start_position-4:start_position-1]
+			up_dict[j] = up_site
 
 	# generate output files
 	with open(input_cds) as f_in, open(output_file,"w") as f_out:
-		i = 0
-		for line in f_in:
-			if line.startswith(">"):
-				i += 1
-				f_out.write(line)
-				line = f_in.readline()
-				up_site = up_dict[i]
-				new_line = up_site + line
-				f_out.write(new_line)
-			else:
-				f_out.write(line)
+		for i in range(len(up_dict)):
+			i += 1
+			headline = headline_dict[i]
+			f_out.write(headline)
+			seqline = up_dict[i]
+			for seq in sequence_dict[i]:
+				seqline += seq.strip()
+			seqline += "\n"
+			f_out.write(seqline)
 
 
 ################################################################################
@@ -144,8 +140,6 @@ def seq_upsite(seq, strand, start, end):
 		start_codon = str(seq[end-3:end].reverse_complement()).upper()
 		up_codon = str(seq[end:end+3].reverse_complement()).upper()
 	return [start_codon, up_codon]
-
-
 
 # This function extracts the upsteaming 3-nt, based on a CDS file and its corresponding bed.
 # The genome fasta file is required as well.
@@ -189,19 +183,79 @@ def preproc_CDS_bed(input_cds, input_genome, input_bed, output_file, chr_id_map_
 			start_dict[s_id] = start_codon
 
 	# generate output file
-	with open(input_cds) as f_in, open(output_file, "w") as f_out:
+	with open(input_cds) as f_in:
+		headline_dict = {}
+		sequence_dict = {}
+		i = 0
 		for line in f_in:
 			if line.startswith(">"):
-				cds_id = line.lstrip(">").strip()
-				f_out.write(line)
-				line = f_in.readline()
-				if cds_id in start_dict and line[0:3] == start_dict[cds_id]:
-					new_line = up_dict[cds_id] + line
-				else:
-					new_line = "NNN" + line
-				f_out.write(new_line)
+				i += 1
+				headline_dict[i] = line
+				sequence_dict[i] = []
 			else:
-				f_out.write(line)
+				sequence_dict[i].append(line)
+
+	with open(output_file, "w") as f_out:
+		for i in range(len(headline_dict)):
+			i += 1
+			f_out.write(headline_dict[i])
+			cds_id = headline_dict[i].lstrip(">").strip()
+			seqline = ""
+			for seq in sequence_dict[i]:
+				seqline += seq.strip()
+			if cds_id in start_dict and seqline[0:3] == start_dict[cds_id]:
+				seqline = up_dict[cds_id] + seqline + "\n"
+			else:
+				seqline = "NNN" + seqline + "\n"
+			f_out.write(seqline)
+
+
+################################################################################
+# Filtering extended ORFs
+################################################################################
+# This function accepts extended ORFs, and removed those:
+# 1) not multiples of 3
+# 2) have non-ACTG nucleotides within
+# 3) have early stop codons 
+# 4) have an out-of-range length (not within 11-101 codons, including the stop codon)
+def check_extended_orf(extended_orf, min_l=10, max_l=100):
+	min_length = 3*min_l + 6
+	max_length = 3*max_l + 6
+	length = len(extended_orf)
+	if length%3 == 0 and length <= max_length and length >= min_length:
+		if_removed = 0
+		coding_region = extended_orf[3:length-3]
+		for i in range(len(coding_region)//3):
+			codon = coding_region[3*i:3*i+3].upper()
+			if codon not in Util.CODON_TABLE or Util.CODON_TABLE[codon] == "*":
+				if_removed = 1
+				break
+	else:
+		if_removed = 1
+	return if_removed
+
+def filtering_fasta(input_file, output_file):
+	with open(input_file) as f_in:
+		headline_dict = {}
+		sequence_dict = {}
+		i = 0
+		for line in f_in:
+			if line.startswith(">"):
+				i += 1
+				headline_dict[i] = line
+				sequence_dict[i] = []
+			else:
+				sequence_dict[i].append(line)
+
+	with open(output_file, "w") as f_out:
+		for i in range(len(headline_dict)):
+			i += 1
+			seqline = ""
+			for seq in sequence_dict[i]:
+				seqline += seq.strip()
+			if check_extended_orf(seqline) == 0:
+				f_out.write(headline_dict[i])
+				f_out.write(seqline + "\n")
 
 
 ################################################################################
@@ -234,6 +288,8 @@ if __name__ == '__main__':
 		preproc_CDS_mRNA(input_file, ARGS.mrna, output_file)
 	elif proc_type == "genome":
 		preproc_CDS_bed(input_file, ARGS.genome, ARGS.bed, output_file, ARGS.list)
+	elif proc_type == "filter":
+		filtering_fasta(input_file, output_file)
 	else:
 		raise TypeError(
 			"Type (-t|--type) should be ncRNA, mRNA or genome."
