@@ -499,7 +499,11 @@ AGG	0
 
 The first column indicates the start codon of smORFs, and the second column indicates the score cutoffs. Only smORFs with scores higher than its corresponding cutoff will be reserved during prediction. Cutoff 0 means smORFs with that start codon will not be considered.
 
-Non-ATG start codons vary largely in efficiency and frequency. You could adjust their cutoff to your interest.  Or set all cutoffs of non-ATG start codons as 0, if you only concern about ATG-started smORFs.
+**Note:**
+
+- Non-ATG start codons vary largely in efficiency and frequency. You could adjust their cutoff to your interest.  Or set all cutoffs of non-ATG start codons as 0, if you only concern about ATG-started smORFs. 
+- Be aware of that exsistence of samples with non-ATG start codons in positive training dataset might lead to an inappropriate overestimation for that codon in prediction.
+- It is also worth considering to increase the cutoff (e.g., ~0.8 for prediction in human), thus improve precision at the cost of recall, especially for large genomes.
 
 ## 11 Predicting smORFs from the genome (Eg12)
 
@@ -531,6 +535,10 @@ The output files includes:
 - **Eg12.socp.upsite.tsv**, recording the the upstreaming three nucleotides of smORFs, as the nucleotides have been used in prediction.
 
 It usually takes a long time to predict smORFs from genome. While multi-processing is not available in sOCP, you might split the genome FASTA into small files, (e. g. one chromosome in one file) and run sOCP In parallel.
+
+**Note:**
+
+- As there will be a number of predicted smORFs located within canonical CDSs, subsequent filtering is recommended based on BED files of canonical CDSs and smORFs.
 
 # Contact
 
