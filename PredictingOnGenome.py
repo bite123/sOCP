@@ -75,7 +75,7 @@ if __name__ == '__main__':
 	if not ARGS.min_len:
 		min_len = 10
 	else:
-		min_len = int(ARGS.min_len) - 1
+		min_len = int(ARGS.min_len)
 	if not ARGS.max_len:
 		max_len = 100
 	else:
